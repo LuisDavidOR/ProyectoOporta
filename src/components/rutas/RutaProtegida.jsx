@@ -4,9 +4,9 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 const RutaProtegida = () => {
   return (
     <Container className="mt-3">
-      <Row className="aling-items-center">
+      <Row className="align-items-center">
         <Col>
-          <h2><i className="bi-house-fill me-2"></i> Ruta Protegida"</h2>
+          <h2><i className="bi-house-fill me-2"></i> Ruta Protegida</h2>
         </Col>
       </Row>
     </Container>

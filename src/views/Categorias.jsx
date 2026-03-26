@@ -4,7 +4,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 const Categorias = () => {
   return (
     <Container className="mt-3">
-      <Row className="aling-items-center">
+      <Row className="align-items-center">
         <Col>
           <h2><i className="bi-house-fill me-2"></i> Categorias</h2>
         </Col>
