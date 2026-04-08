@@ -101,8 +101,6 @@ const Encabezado = () => {
               <strong>Catalogo</strong>
             </Nav.Link>
 
-            <hr />
-
             {/*Icono cerrar sesión en barra superior */}
             {mostrarMenu ? null : (
               <Nav.Link
@@ -155,7 +153,7 @@ const Encabezado = () => {
             className="d-inline-block me-2"
           />
           <strong>
-            <h4 className="mb-0">Discosa</h4>
+            <h4 className="mb-0">Proyecto Oporta</h4>
           </strong>
         </Navbar.Brand>
 
