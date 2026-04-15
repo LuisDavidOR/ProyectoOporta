@@ -5,6 +5,7 @@ import { supabase } from "../database/supabaseconfig";
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import TablaCategorias from "../components/categorias/TablaCategorias";
+import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 
 const Categorias = () => {
 
@@ -169,6 +170,13 @@ const Categorias = () => {
       {/* Lista de categorías cargadas */}
       {!cargando && categorias.length > 0 && (
         <Row>
+          <Col xs={12} sm={12} md={12} className="d-lg-none">
+            <TarjetaCategoria
+              categorias={categorias}
+              abrirModalEdicion={abrirModalEdicion}
+              abrirModalEliminacion={abrirModalEliminacion}
+            />
+          </Col>
           <Col lg={12} className="d-none d-lg-block">
             <TablaCategorias
               categorias={categorias}
