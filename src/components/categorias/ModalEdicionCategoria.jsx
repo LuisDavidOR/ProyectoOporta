@@ -64,7 +64,7 @@ const ModalEdicionCategoria = ({
         <Button
           variant="primary"
           onClick={handleActualizar}
-          disabled={categoriaEditar.nombre_categoria.trim() === "" | deshabilitado}
+          disabled={categoriaEditar.nombre_categoria.trim() === "" || deshabilitado}
         >
           Actualizar
         </Button>
