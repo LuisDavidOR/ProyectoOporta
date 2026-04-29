@@ -4,6 +4,10 @@ import { supabase } from "../database/supabaseconfig";
 import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
+import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
+import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
+import TablaProductos from "../components/productos/TablaProductos";
+import TarjetaProductos from "../components/productos/TarjetaProductos";
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);
@@ -64,10 +68,12 @@ const Productos = () => {
         const nombre = prod.nombre_producto?.toLowerCase() || "";
         const descripcion = prod.descripcion_producto?.toLowerCase() || "";
         const precio = prod.precio_venta?.toString() || "";
+        const categoria = prod.Categorias?.nombre_categoria?.toLowerCase() || "";
         return (
           nombre.includes(textoLower) ||
           descripcion.includes(textoLower) ||
-          precio.includes(textoLower)
+          precio.includes(textoLower) ||
+          categoria.includes(textoLower)
         );
       });
       setProductosFiltrados(filtrados);
@@ -76,6 +82,7 @@ const Productos = () => {
 
   useEffect(() => {
     cargarCategorias();
+    cargarProductos();
   }, []);
 
   const cargarCategorias = async () => {
@@ -88,6 +95,30 @@ const Productos = () => {
       setCategorias(data || []);
     } catch (err) {
       console.error("Error al cargar categorías: ", err);
+    }
+  };
+
+  const cargarProductos = async () => {
+    try {
+      setCargando(true);
+
+      const { data, error } = await supabase
+        .from("Productos")
+        .select(`
+          *,
+          Categorias (
+            nombre_categoria
+          )
+        `)
+        .order("id_producto", { ascending: true });
+
+      if (error) throw error;
+
+      setProductos(data || []);
+    } catch (err) {
+      console.error("Error al cargar productos:", err);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -142,9 +173,152 @@ const Productos = () => {
       });
 
       setToast({ mostrar: true, mensaje: "Producto registrado correctamente", tipo: "exito"});
+      await cargarProductos();
     } catch (err) {
       console.error("Error al agregar producto: ", err);
       setToast({ mostrar: true, mensaje: "Error al registrar producto", tipo: "error"});
+    }
+  };
+
+  //Logica de actualizar
+  const manejoCambioInputEdicion = (e) => {
+    const { name, value } = e.target;
+    setProductoEditar((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const abrirModalEdicion = (producto) => {
+    setProductoEditar({
+      id_producto: producto.id_producto,
+      nombre_producto: producto.nombre_producto,
+      descripcion_producto: producto.descripcion_producto || "",
+      categoria_producto: producto.categoria_producto,
+      precio_venta: producto.precio_venta,
+      url_imagen: producto.url_imagen,
+      archivo: null,
+    });
+
+    setMostrarModalEdicion(true);
+  };
+
+  const abrirModalEliminacion = (producto) => {
+    setProductoAEliminar(producto);
+    setMostrarModalEliminacion(true);
+  };
+
+  const manejoCambioArchivoActualizar = (e) => {
+    const archivo = e.target.files[0];
+    if (archivo && archivo.type.startsWith("image/")) {
+      setProductoEditar((prev) => ({ ...prev, archivo}));
+    } else {
+      alert("Selecciona una imagen válida (JPG, PNG, etc.");
+    }
+  };
+
+  const actualizarProducto = async () => {
+    try {
+      if (
+        !productoEditar.nombre_producto.trim() ||
+        !productoEditar.categoria_producto ||
+        !productoEditar.precio_venta
+      ) {
+        setToast({
+          mostrar: true,
+          mensaje: "Completa los campos obligatorios",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
+      setMostrarModalEdicion(false);
+
+      let datosActualizados = {
+        nombre_producto: productoEditar.nombre_producto,
+        descripcion_producto: productoEditar.descripcion_producto,
+        categoria_producto: productoEditar.categoria_producto,
+        precio_venta: parseFloat(productoEditar.precio_venta),
+        url_imagen: productoEditar.url_imagen,
+      };
+
+      if (productoEditar.archivo) {
+        const nombreArchivo = `${Date.now()}_${productoEditar.archivo.name}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("imagenes_productos")
+          .upload(nombreArchivo, productoEditar.archivo);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("imagenes_productos")
+          .getPublicUrl(nombreArchivo);
+        datosActualizados.url_imagen = urlData.publicUrl;
+
+        if (productoEditar.url_imagen) {
+          const nombreAnterior = productoEditar.url_imagen.split("/").pop().split("?")[0];
+          await supabase.storage.from("imagenes_productos").remove([nombreAnterior]).catch(() => {});
+        }
+
+      }
+
+      const { error } = await supabase
+        .from("Productos")
+        .update(datosActualizados)
+        .eq("id_producto", productoEditar.id_producto);
+      
+      if (error) throw error;
+
+      await cargarProductos();
+
+      setProductoEditar({
+        id_producto: "",
+        nombre_producto: "",
+        descripcion_producto: "",
+        categoria_producto: "",
+        precio_venta: "",
+        url_imagen: "",
+        archivo: null,
+      });
+
+      setToast({ mostrar: true, mensaje: "Producto actualizado correctamente", tipo: "exito"});
+    } catch (err) {
+      console.error("Error al actualizar: ", err);
+      setToast({ mostrar: true, mensaje: "Error al actualizar producto", tipo: "error"});
+    }
+  };
+
+  const eliminarProducto = async () => {
+    if (!productoAEliminar) return;
+    try {
+      setMostrarModalEliminacion(false);
+
+      const { error } = await supabase
+        .from("Productos")
+        .delete()
+        .eq("id_producto", productoAEliminar.id_producto);
+      
+      if (error) {
+        console.error("Error al eliminar producto: ", error.message);
+        setToast({
+          mostrar: true,
+          mensaje: `Error al eliminar el producto ${productoAEliminar.nombre_producto}.`,
+          tipo: "error",
+        });
+        return;
+      }
+
+      await cargarProductos();
+      setToast({
+        mostrar: true,
+        mensaje: `Producto ${productoAEliminar.nombre_producto} eliminado exitosamente.`,
+        tipo: "exito",
+      });
+    } catch (err) {
+      setToast ({
+        mostrar: true,
+        mensaje: "Error inesperado al eliminar producto.",
+        tipo: "error",
+      });
+      console.error("Excepción al eliminar producto: ", err.message);
     }
   };
 
@@ -173,10 +347,50 @@ const Productos = () => {
           <CuadroBusquedas
             textoBusqueda={textoBusqueda}
             manejarCambioBusqueda={manejarBusqueda}
-            placeholder="Buscar por nombre, descripción o precio..."
+            placeholder="Buscar por nombre, descripción, categoría o precio..."
           />
         </Col>
       </Row>
+
+      {!cargando && textoBusqueda.trim() && productosFiltrados.length === 0 && (
+        <Row className="mb-4">
+          <Col>
+            <Alert variant="info" className="text-center">
+              <i className="bi bi-info-circle me-2"></i>
+              No se encontraron productos que coincidan con "{textoBusqueda}".
+            </Alert>
+          </Col>
+        </Row>
+      )}
+
+      {cargando && (
+        <Row className="text-center my-5">
+          <Col>
+            <Spinner animation="border" variant="success" size="lg" />
+            <p className="mt-3 text-muted">Cargando productos...</p>
+          </Col>
+        </Row>
+      )}
+
+      {/* Lista de productos cargadas */}
+      {!cargando && productosFiltrados.length > 0 && (
+        <Row>
+          <Col xs={12} sm={12} md={12} className="d-lg-none">
+            <TarjetaProductos
+              productos={productosFiltrados}
+              abrirModalEdicion={abrirModalEdicion}
+              abrirModalEliminacion={abrirModalEliminacion}
+            />
+          </Col>
+          <Col lg={12} className="d-none d-lg-block">
+            <TablaProductos
+              productos={productosFiltrados}
+              abrirModalEdicion={abrirModalEdicion}
+              abrirModalEliminacion={abrirModalEliminacion}
+            />
+          </Col>
+        </Row>
+      )}
 
       {/* Modales */}
       <ModalRegistroProducto
@@ -187,6 +401,23 @@ const Productos = () => {
         manejoCambioInput={manejoCambioInput}
         agregarProducto={agregarProducto}
         categorias={categorias}
+      />
+
+      <ModalEdicionProducto
+        mostrarModalEdicion={mostrarModalEdicion}
+        setMostrarModalEdicion={setMostrarModalEdicion}
+        productoEditar={productoEditar}
+        manejoCambioInputEdicion={manejoCambioInputEdicion}
+        manejoCambioArchivoActualizar={manejoCambioArchivoActualizar}
+        actualizarProducto={actualizarProducto}
+        categorias={categorias}
+      />
+
+      <ModalEliminacionProducto
+        mostrarModalEliminacion={mostrarModalEliminacion}
+        setMostrarModalEliminacion={setMostrarModalEliminacion}
+        eliminarProducto={eliminarProducto}
+        producto={productoAEliminar}
       />
 
       <NotificacionOperacion

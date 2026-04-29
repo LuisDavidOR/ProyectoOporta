@@ -27,6 +27,13 @@ margin-top: 50px;
 padding: 20px;
 }
 
+.img-producto {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .tarjeta-categoria-contenedor {
   position: relative;
   overflow: hidden;
@@ -65,4 +72,41 @@ padding: 20px;
   border-radius: 8px;
   padding: 6px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.img-producto-tarjeta {
+  width: 65px;
+  height: 65px;
+  object-fit: cover;
+}
+
+.tarjeta-producto-contenedor {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tarjeta-producto-cuerpo {
+  transition: all 0.2s ease-in-out;
+}
+
+.tarjeta-producto-cuerpo-activo {
+  filter: blur(1px);
+  opacity: 0.35;
+}
+
+.tarjeta-producto-capa {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tarjeta-producto-botones-capa {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
