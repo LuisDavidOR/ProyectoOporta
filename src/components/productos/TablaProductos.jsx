@@ -3,11 +3,11 @@ import { Table, Spinner, Button, Image } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const TablaProductos = ({
-    productos,
-    abrirModalEdicion,
-    abrirModalEliminacion
-  }) => {
-  
+  productos,
+  abrirModalEdicion,
+  abrirModalEliminacion,
+  generarPDFProducto
+}) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,6 +65,15 @@ const TablaProductos = ({
                     onClick={() => abrirModalEliminacion(producto)}
                   >
                     <i className="bi bi-trash"></i>
+                  </Button>
+
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="m-1"
+                    onClick={() => generarPDFProducto(producto)}
+                  >
+                    <i className="bi bi-file-earmark-pdf"></i>
                   </Button>
                 </td>
               </tr>

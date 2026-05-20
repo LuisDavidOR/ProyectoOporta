@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert, Spinner, Image } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
 import NotificacionOperacion from "../components/NotificacionOperacion";
@@ -8,6 +8,8 @@ import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
 import TablaProductos from "../components/productos/TablaProductos";
 import TarjetaProductos from "../components/productos/TarjetaProductos";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);
@@ -322,6 +324,65 @@ const Productos = () => {
     }
   };
 
+  const generarPDFProducto = (producto) => {
+
+    const doc = new jsPDF();
+
+    // Título
+    doc.setFontSize(18);
+    doc.text("Reporte de Producto", 14, 20);
+
+    // Línea decorativa
+    doc.line(14, 25, 195, 25);
+
+    // Información de la categoría
+    doc.setFontSize(12);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["ID", producto.id_producto],
+        ["Nombre", producto.nombre_producto],
+        ["Descripción", producto.descripcion_producto],
+        ["Categoría", producto.Categorias?.nombre_categoria || "Sin categoría"],
+        ["Precio", producto.precio_venta],
+        ["Imagen", producto.url_imagen],
+      ],
+    });
+
+    const posicionY = doc.lastAutoTable.finalY + 10;
+
+  // Cargar imagen
+  const img = new window.Image();
+
+  img.crossOrigin = "Anonymous";
+  img.src = producto.url_imagen;
+
+  img.onload = () => {
+    // insertar imagen
+    doc.text("Imagen del producto:", 14, posicionY);
+
+    doc.addImage(
+      img,
+      "JPEG",
+      14,
+      posicionY + 5,
+      50,
+      50
+    );
+
+    doc.save(`producto_${producto.id_producto}.pdf`);
+  };
+
+  img.onerror = () => {
+    console.error("No se pudo cargar la imagen");
+
+    doc.text("No se pudo cargar la imagen.", 14, posicionY);
+    doc.save(`producto_${producto.id_producto}.pdf`);
+  };
+  };
+
   return (
     <Container className="mt-3">
       <Row className="align-items-center mb-3">
@@ -380,6 +441,7 @@ const Productos = () => {
               productos={productosFiltrados}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarPDFProducto={generarPDFProducto}
             />
           </Col>
           <Col lg={12} className="d-none d-lg-block">
@@ -387,6 +449,7 @@ const Productos = () => {
               productos={productosFiltrados}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarPDFProducto={generarPDFProducto}
             />
           </Col>
         </Row>

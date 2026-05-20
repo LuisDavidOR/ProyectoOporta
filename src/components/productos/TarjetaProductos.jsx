@@ -6,6 +6,7 @@ const TarjetaProductos = ({
   productos,
   abrirModalEdicion,
   abrirModalEliminacion,
+  generarPDFProducto
 }) => {
   const [cargando, setCargando] = useState(true);
   const [idTarjetaActiva, setIdTarjetaActiva] = useState(null);
@@ -137,6 +138,15 @@ const TarjetaProductos = ({
                         aria-label={`Eliminar ${producto.nombre_producto}`}
                       >
                         <i className="bi bi-trash"></i>
+                      </Button>
+
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="m-1"
+                        onClick={() => generarPDFProducto(producto)}
+                      >
+                        <i className="bi bi-file-earmark-pdf"></i>
                       </Button>
                     </div>
                   </div>

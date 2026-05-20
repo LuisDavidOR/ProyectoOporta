@@ -5,7 +5,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 const TarjetaCategoria = ({
   categorias,
   abrirModalEdicion,
-  abrirModalEliminacion
+  abrirModalEliminacion,
+  generarPDFCategoria
 }) => {
 
   const [cargando, setCargando] = useState(true);
@@ -124,6 +125,15 @@ const TarjetaCategoria = ({
                       aria-label={`Eliminar ${categoria.nombre_categoria}`}
                     >
                       <i className="bi bi-trash"></i>
+                    </Button>
+
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="m-1"
+                      onClick={() => generarPDFCategoria(categoria)}
+                    >
+                      <i className="bi bi-file-earmark-pdf"></i>
                     </Button>
                   </div>
                 </div>
