@@ -104,6 +104,26 @@ const Encabezado = () => {
               </Nav.Link>
             )}
 
+            {tienePermiso('ver_clientes') && (
+              <Nav.Link
+                onClick={() => manejarNavegacion("/clientes")}
+                className={mostrarMenu ? "color-texto-marca" : "text-white"}
+              >
+                {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+                <strong>Clientes</strong>
+              </Nav.Link>
+            )}
+
+            {tienePermiso('ver_ventas') && (
+              <Nav.Link
+                onClick={() => manejarNavegacion("/ventas")}
+                className={mostrarMenu ? "color-texto-marca" : "text-white"}
+              >
+                {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+                <strong>Ventas</strong>
+              </Nav.Link>
+            )}
+
             {tienePermiso('ver_permisos') && (
             <Nav.Link
               onClick={() => manejarNavegacion("/permisos")}
@@ -197,7 +217,7 @@ const Encabezado = () => {
           onHide={() => setMostrarMenu(false)}
         >
           <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Menú Discosa</Offcanvas.Title>
+            <Offcanvas.Title>Menú Oporta</Offcanvas.Title>
           </Offcanvas.Header>
 
           <Offcanvas.Body>
