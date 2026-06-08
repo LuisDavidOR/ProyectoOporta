@@ -6,7 +6,8 @@ const TablaCategorias = ({
     categorias,
     abrirModalEdicion,
     abrirModalEliminacion,
-    generarPDFCategoria
+    generarPDFCategoria,
+    copiarCategoria
   }) => {
   
   const [loading, setLoading] = useState(true);
@@ -67,6 +68,16 @@ const TablaCategorias = ({
                     onClick={() => generarPDFCategoria(categoria)}
                   >
                     <i className="bi bi-file-earmark-pdf"></i>
+                  </Button>
+
+                  <Button
+                    variant="outline-success"
+                    size="sm"
+                    className="m-1"
+                    onClick={() => copiarCategoria(categoria)}
+                    title="Copiar al portapapeles"
+                  >
+                    <i className="bi bi-clipboard"></i>
                   </Button>
                 </td>
               </tr>
